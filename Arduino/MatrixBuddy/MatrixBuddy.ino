@@ -13,12 +13,12 @@ ConnectionStatus voiceConnected = DISCONNECTED;
 void setup() {
   Serial.begin(9600);
   /*
-   The MAX72XX is in power-saving mode on startup,
-   we have to do a wakeup call
-   */
+    The MAX72XX is in power-saving mode on startup,
+    we have to do a wakeup call
+  */
   lc.shutdown(0, false);
   /* Set the brightness to a medium values */
-  lc.setIntensity(0,1);
+  lc.setIntensity(0, 1);
   /* and clear the display */
   lc.clearDisplay(0);
 
@@ -31,12 +31,12 @@ void setup() {
 }
 
 void drawAll(const byte image[]) {
-  for(int i=0;i<8;i++) {
+  for (int i = 0; i < 8; i++) {
     lc.setRow(0, i, image[i]);
   }
 }
 
-void blink(const int duration, const int depth=0) {
+void blink(const int duration, const int depth = 0) {
   Serial.println("blink");
   // Hardcoded blinking eyes "sprite"
   lc.setRow(0, 0, 0x00);
@@ -56,10 +56,10 @@ void blink(const int duration, const int depth=0) {
   }
   if (random(0, 3 + depth) == 2) // Chance to flutter eyes
   {
-    for(int i = 0; i <= depth;i++) // indicate blink depth
+    for (int i = 0; i <= depth; i++) // indicate blink depth
       Serial.print("+");
-    delay(duration/10);
-    blink(duration, depth+1);
+    delay(duration / 10);
+    blink(duration, depth + 1);
   }
 }
 
@@ -76,7 +76,7 @@ void xEyes() {
   lc.setRow(0, 0, B10100101);
   lc.setRow(0, 1, B01000010);
   lc.setRow(0, 2, B10100101);
-  currentEyes = XES; 
+  currentEyes = XES;
 }
 
 void smile() {
@@ -133,13 +133,13 @@ void loop() {
     }
   }
   if (voiceConnected == DISCONNECTED) {
-    blinkCount += random(1L,3L);  // Add a random number so blinks aren't regular
+    blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
     if (blinkCount >= BLINK_RATE)
     {
       blinkCount = 0L;
       blink(BLINK_LENGTH);
     }
-    mouthCount += random(1L,2L);
+    mouthCount += random(1L, 2L);
     if (mouthCount >= MOUTH_RATE) {
       mouthCount = 0L;
       if (random(0, 2)) {

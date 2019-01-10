@@ -1,16 +1,18 @@
+import atexit
+import configparser
+import logging
+import os
+import sched
+import sys
+import threading
+import time
+from shutil import copyfile
+
 import discord
 import serial
 import serial.tools.list_ports
-import configparser
-import os
-import logging
-from shutil import copyfile
+
 import SysTrayIcon
-import sched
-import time
-import threading
-import sys
-import atexit
 
 REFRESH_RATE = 0.1  # seconds
 
@@ -18,7 +20,6 @@ DISCONNECTED = 0
 CONNECTED = 1
 MUTED = 2
 DEAFENED = 3
-
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -53,7 +54,6 @@ class DiscordListener:
 
         self.voice_state = DISCONNECTED
         self.attempt_login()
-
 
     @staticmethod
     def get_arduino_port():
