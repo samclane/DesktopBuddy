@@ -3,8 +3,8 @@
 
 LedControl lc = LedControl(DIN, CLK, CS, 1);
 
-int incomingByte = 0;
-int currentFace = 0;
+byte incomingByte = 0;
+EMOTES currentFace = HAPPY;
 EYES currentEyes = OPEN;
 long blinkCount = 0L;
 long mouthCount = 0L;
@@ -125,7 +125,7 @@ void loop() {
           drawAll(IMAGES[STOP]);
           break;
       }
-      voiceConnected = incomingByte;
+      voiceConnected = (ConnectionStatus) incomingByte;
     }
     // Unsupported protocol code; display error
     else {
