@@ -78,6 +78,9 @@ const int CS = 4;
 /* Animation frequency */
 const long BLINK_RATE = 83657L;  // It's an ugly way to do timing, but it works
 const long MOUTH_RATE = 43657L;
+//const long BLINK_RATE = 13657L;  // For faster demos
+//const long MOUTH_RATE = 3657L;
+
 
 /* Animation Duration */
 const int BLINK_LENGTH = 150;

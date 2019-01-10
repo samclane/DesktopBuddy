@@ -111,7 +111,7 @@ void loop() {
     // Draw the corresponding image
     if (incomingByte < ConnectionStatusLength) {
       switch (incomingByte) {
-        case DISCONNECTED:
+        case DISCONNECTED: // Reset Face
           drawAll(IMAGES[HAPPY]);
           currentFace = HAPPY;
           break;

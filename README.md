@@ -1,6 +1,6 @@
 # DesktopBuddy
 
-![happy face](https://i.imgur.com/cGgORId.png)
+![](https://i.imgur.com/NESF2KM.gif)
 
 Another iteration on my [DiscordMatrix](https://github.com/samclane/DiscordMatrix) obsession. Displays a little friend 
 on your desktop, with dynamic facial animations. Changes to relevant symbols when connected to a Discord Voice Server. 
@@ -23,3 +23,5 @@ These values can be changed in your `config.ini` which appears after running the
 [Happy Icon by Ilaria Bernareggi from the Noun Project](https://thenounproject.com/search/?q=pixel%20smile&i=508957)
 
 [SysTrayIcon.py by Simon Brunning](http://www.brunningonline.net/simon/blog/archives/SysTrayIcon.py.html)
+
+![happy face](https://i.imgur.com/cGgORId.png)
