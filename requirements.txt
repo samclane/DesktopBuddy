@@ -1,0 +1,4 @@
+discord
+serial
+pyserial
+pywin32
