@@ -9,9 +9,14 @@ EYES currentEyes = OPEN;
 long blinkCount = 0L;
 long mouthCount = 0L;
 ConnectionStatus voiceConnected = DISCONNECTED;
+int prevAvoidReading = 0;
+
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(SENSE, INPUT);
   /*
     The MAX72XX is in power-saving mode on startup,
     we have to do a wakeup call
@@ -37,7 +42,7 @@ void drawAll(const byte image[]) {
 }
 
 void blink(const int duration, const int depth = 0) {
-  Serial.println("blink");
+  // Serial.println("blink");
   // Hardcoded blinking eyes "sprite"
   lc.setRow(0, 0, 0x00);
   lc.setRow(0, 1, 0x00);
@@ -51,20 +56,18 @@ void blink(const int duration, const int depth = 0) {
     case XES:
       xEyes();
       break;
-    default:
-      break;
   }
   if (random(0, 3 + depth) == 2) // Chance to flutter eyes
   {
     for (int i = 0; i <= depth; i++) // indicate blink depth
-      Serial.print("+");
+      // Serial.print("+");
     delay(duration / 10);
     blink(duration, depth + 1);
   }
 }
 
 void openEyes() {
-  Serial.println("open-eyes");
+  // Serial.println("open-eyes");
   lc.setRow(0, 0, 0x00);
   lc.setRow(0, 1, B11000011);
   lc.setRow(0, 2, B11000011);
@@ -72,7 +75,7 @@ void openEyes() {
 }
 
 void xEyes() {
-  Serial.println("x-eyes");
+  // Serial.println("x-eyes");
   lc.setRow(0, 0, B10100101);
   lc.setRow(0, 1, B01000010);
   lc.setRow(0, 2, B10100101);
@@ -80,31 +83,55 @@ void xEyes() {
 }
 
 void smile() {
-  Serial.println("smile");
+  // Serial.println("smile");
   lc.setRow(0, 5, B01000010);
   lc.setRow(0, 6, B00111100);
   lc.setRow(0, 7, 0x00);
 }
 
 void neutralFace() {
-  Serial.println("neutral");
+  // Serial.println("neutral");
   lc.setRow(0, 5, 0x00);
   lc.setRow(0, 6, B01111110);
   lc.setRow(0, 7, 0x00);
 }
 
 void frown() {
-  Serial.println("frown");
+  // Serial.println("frown");
   lc.setRow(0, 5, 0x00);
   lc.setRow(0, 6, B00111100);
   lc.setRow(0, 7, B01000010);
 }
 
+void curlMouth(const bool curlRight) {
+    // Serial.print("curl");
+    if (curlRight) {
+        // Serial.println("_R");
+        lc.setRow(0, 5, B00000010);
+        lc.setRow(0, 6, B01111100);
+    }
+    else {  // curl left
+        // Serial.println("_L");
+        lc.setRow(0, 5, B01000000);
+        lc.setRow(0, 6, B00111110);
+    }
+    lc.setRow(0, 6, B00111100);
+    lc.setRow(0, 7, 0x00);
+}
+
 void loop() {
+  int avoidReading = digitalRead(SENSE);
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (avoidReading != prevAvoidReading) {
+      Serial.write(avoidReading);
+      prevAvoidReading = avoidReading;
+      lastDebounceTime = millis();
+    }
+  }
   if (Serial.available()) {
     // Convert to int quickly
     char ch = Serial.read();
-    Serial.println(ch);
+    // Serial.println(ch);
     if (isDigit) {
       incomingByte = ch - '0';
     }
@@ -146,7 +173,7 @@ void loop() {
         smile();
       }
       else {
-        neutralFace();
+        curlMouth(random(0, 2));
       }
     }
   }

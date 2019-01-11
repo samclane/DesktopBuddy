@@ -11,6 +11,7 @@ from shutil import copyfile
 import discord
 import serial
 import serial.tools.list_ports
+from pyautogui import hotkey
 
 import SysTrayIcon
 
@@ -36,7 +37,7 @@ class DiscordListener:
         self.password = self.config['LoginInfo']['Password']
 
         self.port = self.get_arduino_port()
-        self.ser = serial.Serial(self.port)
+        self.ser = serial.Serial(self.port, timeout=0)
 
         self.threads = dict()
         self.sched = sched.scheduler(time.time, time.sleep)
@@ -88,6 +89,9 @@ class DiscordListener:
         if self.voice_state != state:
             self.voice_state = state
             self.ser.write(str(state).encode())
+        if self.ser.in_waiting:
+            if self.ser.read() == b'\x00':
+                hotkey('ctrl', 'm')
         self.sched.enter(REFRESH_RATE, 1, self.update_status)
 
     def attempt_login(self):
