@@ -91,7 +91,7 @@ class DiscordListener:
             self.ser.write(str(state).encode())
         if self.ser.in_waiting:
             if self.ser.read() == b'\x00':
-                hotkey('pause')
+                hotkey(*self.config["Keybinds"]["Mute"].split('+'))
         self.sched.enter(REFRESH_RATE, 1, self.update_status)
 
     def attempt_login(self):

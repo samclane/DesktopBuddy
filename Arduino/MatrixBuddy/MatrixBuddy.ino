@@ -115,7 +115,6 @@ void curlMouth(const bool curlRight) {
         lc.setRow(0, 5, B01000000);
         lc.setRow(0, 6, B00111110);
     }
-    lc.setRow(0, 6, B00111100);
     lc.setRow(0, 7, 0x00);
 }
 
