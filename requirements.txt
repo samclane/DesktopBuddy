@@ -2,3 +2,4 @@ discord
 serial
 pyserial
 pywin32
+pyautogui
