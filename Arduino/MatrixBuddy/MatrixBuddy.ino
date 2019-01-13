@@ -72,6 +72,7 @@ void openEyes() {
   lc.setRow(0, 1, B11000011);
   lc.setRow(0, 2, B11000011);
   lc.setRow(0, 3, 0x00);
+  currentEyes = OPEN;
 }
 
 void xEyes() {
@@ -122,7 +123,17 @@ void loop() {
   int avoidReading = digitalRead(SENSE);
   if ((millis() - lastDebounceTime) > debounceDelay) {
     if (avoidReading != prevAvoidReading) {
-      Serial.write(avoidReading);
+      if (voiceConnected == DISCONNECTED) {
+        if (!avoidReading) {
+          xEyes();
+        }
+        else {
+          openEyes();
+        }
+      }
+      else {
+        Serial.write(avoidReading);
+      }
       prevAvoidReading = avoidReading;
       lastDebounceTime = millis();
     }
