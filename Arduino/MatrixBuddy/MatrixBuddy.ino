@@ -44,12 +44,10 @@ void drawAll(const byte image[]) {
 void blink(const int duration, const int depth = 0) {
   // Serial.println("blink");
   // Hardcoded blinking eyes "sprite"
-  lc.setRow(0, 0, 0x00);
-  lc.setRow(0, 1, 0x00);
-  lc.setRow(0, 2, B11000011);
-  lc.setRow(0, 3, 0x00);
+  EYES tempEyes = currentEyes;
+  closeEyes();
   delay(duration);
-  switch (currentEyes) {
+  switch (tempEyes) {
     case OPEN:
       openEyes();
       break;
@@ -57,13 +55,19 @@ void blink(const int duration, const int depth = 0) {
       xEyes();
       break;
   }
-  if (random(0, 3 + depth) == 2) // Chance to flutter eyes
+  if (random(0, 3 + depth) == 2) // Chance to flutter eyes. Chance decr. as depth incr.
   {
-    for (int i = 0; i <= depth; i++) // indicate blink depth
-      // Serial.print("+");
     delay(duration / 10);
     blink(duration, depth + 1);
   }
+}
+
+void closeEyes() {
+  lc.setRow(0, 0, 0x00);
+  lc.setRow(0, 1, 0x00);
+  lc.setRow(0, 2, B11000011);
+  lc.setRow(0, 3, 0x00);
+  currentEyes = CLOSED;
 }
 
 void openEyes() {
