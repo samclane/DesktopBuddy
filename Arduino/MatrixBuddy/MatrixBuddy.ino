@@ -12,7 +12,7 @@ ConnectionStatus voiceConnected = DISCONNECTED;
 int prevAvoidReading = 0;
 
 unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay = 50;
+unsigned long debounceDelay =  75;
 
 void setup() {
   Serial.begin(9600);
