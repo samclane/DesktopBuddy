@@ -1,8 +1,9 @@
 #include "LedControl.h"
 #include "MatrixBuddy.h"
+#include <Arduino_FreeRTOS.h>
+
 
 LedControl lc = LedControl(DIN, CLK, CS, 1);
-
 byte incomingByte = 0;
 EMOTES currentFace = HAPPY;
 EYES currentEyes = OPEN;
@@ -12,7 +13,11 @@ ConnectionStatus voiceConnected = DISCONNECTED;
 int prevAvoidReading = 0;
 
 unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay =  75;
+const unsigned long debounceDelay =  75;
+
+void TaskDistanceSense(void *pvParameters);
+void TaskReadSerial(void *pvParameters);
+void TaskIdle(void *pvParameters);
 
 void setup() {
   Serial.begin(9600);
@@ -33,6 +38,30 @@ void setup() {
   currentEyes = OPEN;
 
   randomSeed(analogRead(0));
+
+  xTaskCreate(
+    TaskDistanceSense
+    , (const portCHAR *)"Distance"
+    , 128
+    , NULL
+    , 0
+    , NULL);
+
+  xTaskCreate( // todo: this task needs to be higher priority/triggered by Serial.available()
+    TaskReadSerial
+    , (const portCHAR *)"SerialRead"
+    , 128
+    , NULL
+    , 0
+    , NULL);
+
+  xTaskCreate(
+    TaskIdle
+    , (const portCHAR *)"Idle"
+    , 128
+    , NULL
+    , 0
+    , NULL);
 }
 
 void drawAll(const byte image[]) {
@@ -123,73 +152,92 @@ void curlMouth(const bool curlRight) {
     lc.setRow(0, 7, 0x00);
 }
 
-void loop() {
-  int avoidReading = digitalRead(SENSE);
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    if (avoidReading != prevAvoidReading) {
-      if (voiceConnected == DISCONNECTED) {
-        if (!avoidReading) {
-          xEyes();
+void TaskDistanceSense(void *pvParameters) {
+  (void) pvParameters;
+  for (;;) {
+    int avoidReading = digitalRead(SENSE);
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+      if (avoidReading != prevAvoidReading) {
+        if (voiceConnected == DISCONNECTED) {
+          if (!avoidReading) {
+            xEyes();
+          }
+          else {
+            openEyes();
+          }
         }
         else {
-          openEyes();
+          Serial.write(avoidReading);
+        }
+        prevAvoidReading = avoidReading;
+        lastDebounceTime = millis();
+      }
+    }
+  }
+}
+
+void TaskReadSerial(void *pvParameters) {
+  (void) pvParameters;
+  for (;;) {
+    if (Serial.available()) {
+      // Convert to int quickly
+      char ch = Serial.read();
+      // Serial.println(ch);
+      if (isDigit) {
+        incomingByte = ch - '0';
+      }
+      // Draw the corresponding image
+      if (incomingByte < ConnectionStatusLength) {
+        switch (incomingByte) {
+          case DISCONNECTED: // Reset Face
+            drawAll(IMAGES[HAPPY]);
+            currentFace = HAPPY;
+            break;
+          case CONNECTED:
+            drawAll(IMAGES[PLAY]);
+            break;
+          case MUTED:
+            drawAll(IMAGES[PAUSE]);
+            break;
+          case DEAFENED:
+            drawAll(IMAGES[STOP]);
+            break;
+        }
+        voiceConnected = (ConnectionStatus) incomingByte;
+      }
+      // Unsupported protocol code; display error
+      else {
+        drawAll(IMAGES[ERROR]);
+      }
+    }
+  }
+}
+
+void TaskIdle(void *pvParameters) {
+  (void) pvParameters;
+  for (;;) {
+    if (voiceConnected == DISCONNECTED) {
+      blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
+      if (blinkCount >= BLINK_RATE)
+      {
+        blinkCount = 0L;
+        blink(BLINK_LENGTH);
+      }
+      mouthCount += random(1L, 2L);
+      if (mouthCount >= MOUTH_RATE) {
+        mouthCount = 0L;
+        if (random(0, 2)) {
+          smile();
+        }
+        else {
+          curlMouth(random(0, 2));
         }
       }
-      else {
-        Serial.write(avoidReading);
-      }
-      prevAvoidReading = avoidReading;
-      lastDebounceTime = millis();
     }
   }
-  if (Serial.available()) {
-    // Convert to int quickly
-    char ch = Serial.read();
-    // Serial.println(ch);
-    if (isDigit) {
-      incomingByte = ch - '0';
-    }
-    // Draw the corresponding image
-    if (incomingByte < ConnectionStatusLength) {
-      switch (incomingByte) {
-        case DISCONNECTED: // Reset Face
-          drawAll(IMAGES[HAPPY]);
-          currentFace = HAPPY;
-          break;
-        case CONNECTED:
-          drawAll(IMAGES[PLAY]);
-          break;
-        case MUTED:
-          drawAll(IMAGES[PAUSE]);
-          break;
-        case DEAFENED:
-          drawAll(IMAGES[STOP]);
-          break;
-      }
-      voiceConnected = (ConnectionStatus) incomingByte;
-    }
-    // Unsupported protocol code; display error
-    else {
-      drawAll(IMAGES[ERROR]);
-    }
-  }
-  if (voiceConnected == DISCONNECTED) {
-    blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
-    if (blinkCount >= BLINK_RATE)
-    {
-      blinkCount = 0L;
-      blink(BLINK_LENGTH);
-    }
-    mouthCount += random(1L, 2L);
-    if (mouthCount >= MOUTH_RATE) {
-      mouthCount = 0L;
-      if (random(0, 2)) {
-        smile();
-      }
-      else {
-        curlMouth(random(0, 2));
-      }
-    }
-  }
+}
+
+void loop() {
+
 }
 

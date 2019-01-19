@@ -78,10 +78,10 @@ const int CS = 4;
 const int SENSE = 7;
 
 /* Animation frequency */
-const long BLINK_RATE = 83657L;  // It's an ugly way to do timing, but it works
-const long MOUTH_RATE = 43657L;
-//const long BLINK_RATE = 13657L;  // Faster animations for demo
-//const long MOUTH_RATE = 3657L;
+//const long BLINK_RATE = 83657L;  // It's an ugly way to do timing, but it works
+//const long MOUTH_RATE = 43657L;
+const long BLINK_RATE = 13657L;  // Faster animations for demo
+const long MOUTH_RATE = 3657L;
 
 
 /* Animation Duration */
