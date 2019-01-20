@@ -3,16 +3,9 @@
 
 LedControl lc = LedControl(DIN, CLK, CS, 1);
 
-byte incomingByte = 0;
 EMOTES currentFace = HAPPY;
 EYES currentEyes = OPEN;
-long blinkCount = 0L;
-long mouthCount = 0L;
 ConnectionStatus voiceConnected = DISCONNECTED;
-int prevAvoidReading = 0;
-
-unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay =  75;
 
 void setup() {
   Serial.begin(9600);
@@ -41,7 +34,7 @@ void drawAll(const byte image[]) {
   }
 }
 
-void blink(const int duration, const int depth = 0) {
+void blinkEyes(const int duration, const int depth = 0) {
   // Serial.println("blink");
   // Hardcoded blinking eyes "sprite"
   EYES tempEyes = currentEyes;
@@ -58,7 +51,7 @@ void blink(const int duration, const int depth = 0) {
   if (random(0, 3 + depth) == 2) // Chance to flutter eyes. Chance decr. as depth incr.
   {
     delay(duration / 10);
-    blink(duration, depth + 1);
+    blinkEyes(duration, depth + 1);
   }
 }
 
@@ -123,7 +116,10 @@ void curlMouth(const bool curlRight) {
     lc.setRow(0, 7, 0x00);
 }
 
-void loop() {
+void readAvoidSensor() {
+static unsigned long lastDebounceTime = 0;
+static int prevAvoidReading = 0;
+const unsigned long debounceDelay = 75;
   int avoidReading = digitalRead(SENSE);
   if ((millis() - lastDebounceTime) > debounceDelay) {
     if (avoidReading != prevAvoidReading) {
@@ -142,54 +138,64 @@ void loop() {
       lastDebounceTime = millis();
     }
   }
-  if (Serial.available()) {
-    // Convert to int quickly
-    char ch = Serial.read();
-    // Serial.println(ch);
-    if (isDigit) {
-      incomingByte = ch - '0';
-    }
-    // Draw the corresponding image
-    if (incomingByte < ConnectionStatusLength) {
-      switch (incomingByte) {
-        case DISCONNECTED: // Reset Face
-          drawAll(IMAGES[HAPPY]);
-          currentFace = HAPPY;
-          break;
-        case CONNECTED:
-          drawAll(IMAGES[PLAY]);
-          break;
-        case MUTED:
-          drawAll(IMAGES[PAUSE]);
-          break;
-        case DEAFENED:
-          drawAll(IMAGES[STOP]);
-          break;
-      }
-      voiceConnected = (ConnectionStatus) incomingByte;
-    }
-    // Unsupported protocol code; display error
-    else {
-      drawAll(IMAGES[ERROR]);
-    }
+}
+
+void animateFace() {
+static unsigned long blinkCount = 0L;
+static unsigned long mouthCount = 0L;
+  blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
+  if (blinkCount >= BLINK_RATE) {
+    blinkCount = 0L;
+    blinkEyes(BLINK_LENGTH);
   }
-  if (voiceConnected == DISCONNECTED) {
-    blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
-    if (blinkCount >= BLINK_RATE)
-    {
-      blinkCount = 0L;
-      blink(BLINK_LENGTH);
+  mouthCount += random(1L, 2L);
+  if (mouthCount >= MOUTH_RATE) {
+    mouthCount = 0L;
+    if (random(0, 2)) {
+      smile();
     }
-    mouthCount += random(1L, 2L);
-    if (mouthCount >= MOUTH_RATE) {
-      mouthCount = 0L;
-      if (random(0, 2)) {
-        smile();
-      }
-      else {
-        curlMouth(random(0, 2));
-      }
+    else {
+      curlMouth(random(0, 2));
     }
   }
 }
 
+void loop() {
+  readAvoidSensor();
+  if (voiceConnected == DISCONNECTED) {
+    animateFace();
+  }
+}
+
+void serialEvent() {
+byte incomingByte = 0;
+  // Convert to int quickly
+  char ch = Serial.read();
+  // Serial.println(ch);
+  if (isDigit) {
+    incomingByte = ch - '0';
+  }
+  // Draw the corresponding image
+  if (incomingByte < ConnectionStatusLength) {
+    switch (incomingByte) {
+      case DISCONNECTED: // Reset Face
+        drawAll(IMAGES[HAPPY]);
+        currentFace = HAPPY;
+        break;
+      case CONNECTED:
+        drawAll(IMAGES[PLAY]);
+        break;
+      case MUTED:
+        drawAll(IMAGES[PAUSE]);
+        break;
+      case DEAFENED:
+        drawAll(IMAGES[STOP]);
+        break;
+    }
+    voiceConnected = (ConnectionStatus) incomingByte;
+  }
+  // Unsupported protocol code; display error
+  else {
+    drawAll(IMAGES[ERROR]);
+  }
+}
