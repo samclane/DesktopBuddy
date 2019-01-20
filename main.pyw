@@ -62,7 +62,7 @@ class DiscordListener:
         ports = list(serial.tools.list_ports.comports())
         for p in ports:
             if 'arduino' in p.description.lower():
-                logging.info("Done")
+                logging.info("Arduino port found at {}!".format(str(p)))
                 return p.device
         raise Exception("No Arduino found on any COM ports")
 

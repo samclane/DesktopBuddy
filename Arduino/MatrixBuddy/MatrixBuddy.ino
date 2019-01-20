@@ -7,19 +7,20 @@ LedControl lc = LedControl(DIN, CLK, CS, 1);
 byte incomingByte = 0;
 EMOTES currentFace = HAPPY;
 EYES currentEyes = OPEN;
-long blinkCount = 0L;
-long mouthCount = 0L;
-ConnectionStatus voiceConnected = DISCONNECTED;
+long lastBlinkTime = 0L;
+long lastMountTime = 0L;
+ConnectionStatus voiceConnected;  // TODO: THIS NEEDS TO BE ACCOMPLISHED WITH TASK-COMMUNICATION
 int prevAvoidReading = 0;
 
 unsigned long lastDebounceTime = 0;
 const unsigned long debounceDelay =  75;
 
-void TaskDistanceSense(void *pvParameters);
-void TaskReadSerial(void *pvParameters);
-void TaskIdle(void *pvParameters);
+void vTaskDistanceSense(void *pvParameters);
+void vTaskReadSerial(void *pvParameters);
+void vTaskIdle(void *pvParameters);
 
 void setup() {
+  voiceConnected = DISCONNECTED;
   Serial.begin(9600);
   pinMode(SENSE, INPUT);
   /*
@@ -40,7 +41,7 @@ void setup() {
   randomSeed(analogRead(0));
 
   xTaskCreate(
-    TaskDistanceSense
+    vTaskDistanceSense
     , (const portCHAR *)"Distance"
     , 128
     , NULL
@@ -48,7 +49,7 @@ void setup() {
     , NULL);
 
   xTaskCreate( // todo: this task needs to be higher priority/triggered by Serial.available()
-    TaskReadSerial
+    vTaskReadSerial
     , (const portCHAR *)"SerialRead"
     , 128
     , NULL
@@ -56,7 +57,7 @@ void setup() {
     , NULL);
 
   xTaskCreate(
-    TaskIdle
+    vTaskIdle
     , (const portCHAR *)"Idle"
     , 128
     , NULL
@@ -152,7 +153,7 @@ void curlMouth(const bool curlRight) {
     lc.setRow(0, 7, 0x00);
 }
 
-void TaskDistanceSense(void *pvParameters) {
+void vTaskDistanceSense(void *pvParameters) {
   (void) pvParameters;
   for (;;) {
     int avoidReading = digitalRead(SENSE);
@@ -174,9 +175,10 @@ void TaskDistanceSense(void *pvParameters) {
       }
     }
   }
+  vTaskDelete(NULL);
 }
 
-void TaskReadSerial(void *pvParameters) {
+void vTaskReadSerial(void *pvParameters) {
   (void) pvParameters;
   for (;;) {
     if (Serial.available()) {
@@ -211,21 +213,20 @@ void TaskReadSerial(void *pvParameters) {
       }
     }
   }
+  vTaskDelete(NULL);
 }
 
-void TaskIdle(void *pvParameters) {
+void vTaskIdle(void *pvParameters) {
   (void) pvParameters;
   for (;;) {
     if (voiceConnected == DISCONNECTED) {
-      blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
-      if (blinkCount >= BLINK_RATE)
+      if (millis() - lastBlinkTime >= BLINK_RATE)
       {
-        blinkCount = 0L;
+        lastBlinkTime = millis() + random(-100L, 100L);
         blink(BLINK_LENGTH);
       }
-      mouthCount += random(1L, 2L);
-      if (mouthCount >= MOUTH_RATE) {
-        mouthCount = 0L;
+      if (millis() - lastMountTime >= MOUTH_RATE) {
+        lastMountTime = millis() + random(-100L, 100L);
         if (random(0, 2)) {
           smile();
         }
