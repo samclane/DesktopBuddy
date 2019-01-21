@@ -1,3 +1,15 @@
+/*
+ * MyFace.h
+ *
+ *  Created on: Jan 21, 2019
+ *      Author: SawyerPC
+ */
+
+#ifndef MYFACE_H_
+#define MYFACE_H_
+#include "Arduino.h"
+#include "LedControl.h"
+
 const byte IMAGES[][8] = {
   { // HAPPY
     B00000000,
@@ -48,41 +60,33 @@ const byte IMAGES[][8] = {
 };
 const int IMAGES_LEN = sizeof(IMAGES) / 8;
 
-
 enum EMOTES {
-  HAPPY,
-  ERROR,
-  PLAY,
-  STOP,
-  PAUSE
+	HAPPY, ERROR, PLAY, STOP, PAUSE
 };
 
 enum EYES {
-  OPEN,
-  CLOSED,
-  XES
+	OPEN, CLOSED, XES
 };
 
-enum ConnectionStatus {
-  DISCONNECTED,
-  CONNECTED,
-  MUTED,
-  DEAFENED,
-  ConnectionStatusLength
+
+class MyFace {
+private:
+	LedControl lc;
+public:
+	volatile EYES currentEyes;
+	volatile EMOTES currentFace;
+	MyFace(const int din, const int clk, const int cs);
+	MyFace();
+	virtual ~MyFace();
+	void drawAll(const byte image[]);
+	void blinkEyes(const int duration, const int depth = 0);
+	void closeEyes();
+	void openEyes();
+	void xEyes();
+	void smile();
+	void neutralFace();
+	void frown();
+	void curlMouth(const bool curlRight);
 };
 
-/* Pinouts */
-const int DIN = 3;
-const int CLK = 6;
-const int CS = 5;
-const int SENSE = 2;
-
-/* Animation frequency */
-const long BLINK_RATE = 83657L;  // It's an ugly way to do timing, but it works
-const long MOUTH_RATE = 43657L;
-//const long BLINK_RATE = 13657L;  // Faster animations for demo
-//const long MOUTH_RATE = 3657L;
-
-
-/* Animation Duration */
-const int BLINK_LENGTH = 150;
+#endif /* MYFACE_H_ */

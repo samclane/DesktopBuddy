@@ -2,3 +2,6 @@
 __pycache__/
 venv/
 config.ini
+Arduino/MatrixBuddy/build/
+Arduino/MatrixBuddy/.*
+*_old
