@@ -72,10 +72,10 @@ enum ConnectionStatus {
 };
 
 /* Pinouts */
-const int DIN = 2;
-const int CLK = 3;
-const int CS = 4;
-const int SENSE = 7;
+const int DIN = 3;
+const int CLK = 6;
+const int CS = 5;
+const int SENSE = 2;
 
 /* Animation frequency */
 const long BLINK_RATE = 83657L;  // It's an ugly way to do timing, but it works

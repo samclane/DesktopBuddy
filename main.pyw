@@ -89,8 +89,11 @@ class DiscordListener:
         if self.voice_state != state:
             self.voice_state = state
             self.ser.write(str(state).encode())
+            logging.info("Serial TX: {}".format(str(state)))
         if self.ser.in_waiting:
-            if self.ser.read() == b'\x00':
+            byte_in = self.ser.read()
+            logging.info("Serial RX: {}".format(str(byte_in)))
+            if byte_in == b'\x00':
                 hotkey(*self.config["Keybinds"]["Mute"].split('+'))
         self.sched.enter(REFRESH_RATE, 1, self.update_status)
 

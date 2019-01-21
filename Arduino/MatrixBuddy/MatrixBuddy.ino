@@ -3,9 +3,9 @@
 
 LedControl lc = LedControl(DIN, CLK, CS, 1);
 
-EMOTES currentFace = HAPPY;
-EYES currentEyes = OPEN;
-ConnectionStatus voiceConnected = DISCONNECTED;
+volatile EMOTES currentFace = HAPPY;
+volatile EYES currentEyes = OPEN;
+volatile ConnectionStatus voiceConnected = DISCONNECTED;
 
 void setup() {
   Serial.begin(9600);
@@ -26,6 +26,8 @@ void setup() {
   currentEyes = OPEN;
 
   randomSeed(analogRead(0));
+
+  attachInterrupt(digitalPinToInterrupt(SENSE), readAvoidSensor, FALLING);
 }
 
 void drawAll(const byte image[]) {
@@ -116,27 +118,26 @@ void curlMouth(const bool curlRight) {
     lc.setRow(0, 7, 0x00);
 }
 
+void avoidISR() {
+  readAvoidSensor();
+}
+
 void readAvoidSensor() {
 static unsigned long lastDebounceTime = 0;
-static int prevAvoidReading = 0;
-const unsigned long debounceDelay = 75;
-  int avoidReading = digitalRead(SENSE);
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    if (avoidReading != prevAvoidReading) {
-      if (voiceConnected == DISCONNECTED) {
-        if (!avoidReading) {
-          xEyes();
-        }
-        else {
-          openEyes();
-        }
+const unsigned long debounceDelay = 750;
+  if (millis() - lastDebounceTime > debounceDelay) {
+    if (voiceConnected == DISCONNECTED) {
+      if (currentEyes == OPEN) {
+        xEyes();
       }
       else {
-        Serial.write(avoidReading);
+        openEyes();
       }
-      prevAvoidReading = avoidReading;
-      lastDebounceTime = millis();
     }
+    else {
+      Serial.write(0);
+    }
+    lastDebounceTime = millis();
   }
 }
 
@@ -161,7 +162,7 @@ static unsigned long mouthCount = 0L;
 }
 
 void loop() {
-  readAvoidSensor();
+  // readAvoidSensor();
   if (voiceConnected == DISCONNECTED) {
     animateFace();
   }
