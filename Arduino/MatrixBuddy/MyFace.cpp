@@ -7,7 +7,8 @@
 
 #include "MyFace.h"
 
-MyFace::MyFace(const int din, const int clk, const int cs): lc(LedControl(din, clk, cs)) {
+MyFace::MyFace(const int din, const int clk, const int cs) :
+		lc(LedControl(din, clk, cs)) {
 	currentEyes = OPEN;
 	currentFace = HAPPY;
 	/*
@@ -24,8 +25,7 @@ MyFace::MyFace(const int din, const int clk, const int cs): lc(LedControl(din, c
 }
 
 MyFace::~MyFace() {
-	// TODO Auto-generated destructor stub
-	this->drawAll(IMAGES[ERROR]);
+	drawAll(IMAGES[ERROR]);
 }
 
 void MyFace::drawAll(const byte image[]) {

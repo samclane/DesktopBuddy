@@ -1,3 +1,10 @@
+/*
+ * main.h
+ *
+ *  Created on: Jan 19, 2019
+ *      Author: SawyerPC
+ */
+
 #ifndef MAIN_H_
 #define MAIN_H_
 
@@ -13,16 +20,11 @@ enum ConnectionStatus {
 int DIN = 3;
 int CLK = 6;
 int CS = 5;
-int SENSE = 2;
+int AVOID_SENSE = 2;
 
-/* Animation frequency */
-const long BLINK_RATE = 83657L;  // It's an ugly way to do timing, but it works
-const long MOUTH_RATE = 43657L;
-//const long BLINK_RATE = 13657L;  // Faster animations for demo
-//const long MOUTH_RATE = 3657L;
-
-/* Animation Duration */
-const int BLINK_LENGTH = 150;
+// Variables
+volatile ConnectionStatus voiceConnected;
+MyFace face = MyFace(DIN, CLK, CS); //TODO  I don't want to initialize this here but it's making me
 
 // Function Definitions
 

@@ -1,22 +1,28 @@
+/*
+ * main.cpp
+ *
+ *  Created on: Jan 19, 2019
+ *      Author: SawyerPC
+ */
+
+
 #include "main.h"
 
-volatile ConnectionStatus voiceConnected = DISCONNECTED;
-
-MyFace face = MyFace(DIN, CLK, CS);
-
 void setup() {
+	voiceConnected = DISCONNECTED;
+
 	Serial.begin(9600);
-	pinMode(SENSE, INPUT);
+	pinMode(AVOID_SENSE, INPUT);
 
 	randomSeed(analogRead(0));
 
-	attachInterrupt(digitalPinToInterrupt(SENSE), readAvoidSensor, FALLING);
+	attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), readAvoidSensor, CHANGE);
 }
-
 
 void readAvoidSensor() {
 	static unsigned long lastDebounceTime = 0;
-	const unsigned long debounceDelay = 750;
+	static byte lastByteSent = 0x00;
+	const static unsigned long debounceDelay = 100;
 	if (millis() - lastDebounceTime > debounceDelay) {
 		if (voiceConnected == DISCONNECTED) {
 			if (face.currentEyes == OPEN) {
@@ -25,7 +31,9 @@ void readAvoidSensor() {
 				face.openEyes();
 			}
 		} else {
-			Serial.write(0);
+			// We're connected to Discord; Send serial signal to PC for mute
+			lastByteSent = ~lastByteSent;
+			Serial.write(lastByteSent);
 		}
 		lastDebounceTime = millis();
 	}
@@ -36,16 +44,15 @@ void avoidISR() {
 }
 
 void animateFace() {
-	static unsigned long blinkCount = 0L;
-	static unsigned long mouthCount = 0L;
-	blinkCount += random(1L, 3L); // Add a random number so blinks aren't regular
-	if (blinkCount >= BLINK_RATE) {
-		blinkCount = 0L;
+	static unsigned long lastBlink = 0L;
+	static unsigned long lastMouth = 0L;
+	if (millis() - lastBlink >= BLINK_PERIOD_MS) {
+		// Add a random number so blinks aren't regular
+		lastBlink = millis() - random(ANIMATION_FUZZ);
 		face.blinkEyes(BLINK_LENGTH);
 	}
-	mouthCount += random(1L, 2L);
-	if (mouthCount >= MOUTH_RATE) {
-		mouthCount = 0L;
+	if (millis() - lastMouth >= MOUTH_PERIOD_MS) {
+		lastMouth = millis() - random(ANIMATION_FUZZ);
 		if (random(0, 2)) {
 			face.smile();
 		} else {
@@ -64,11 +71,10 @@ void serialEvent() {
 	byte incomingByte = 0;
 	// Convert to int quickly
 	char ch = Serial.read();
-	// Serial.println(ch);
 	if (isDigit) {
 		incomingByte = ch - '0';
 	}
-	// Draw the corresponding image
+	// Draw the corresponding image (debug; will probably remove)
 	if (incomingByte < ConnectionStatusLength) {
 		switch (incomingByte) {
 		case DISCONNECTED: // Reset Face
@@ -84,6 +90,8 @@ void serialEvent() {
 		case DEAFENED:
 			face.drawAll(IMAGES[STOP]);
 			break;
+		default:
+			face.drawAll(IMAGES[ERROR]);
 		}
 		voiceConnected = (ConnectionStatus) incomingByte;
 	}
