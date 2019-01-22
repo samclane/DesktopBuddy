@@ -1,4 +1,3 @@
-import atexit
 import configparser
 import logging
 import os
@@ -108,13 +107,13 @@ class DiscordListener:
 
     def exit(self):
         logging.info("Exiting...")
+        self.ser.write(0xFF)
         self.ser.close()
         sys.exit()
 
 
 def main():
-    listener = DiscordListener()
-    atexit.register(listener.exit)
+    DiscordListener()
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ MyFace::MyFace(const int din, const int clk, const int cs): lc(LedControl(din, c
 	/* and clear the display */
 	lc.clearDisplay(0);
 
-	this->drawAll(IMAGES[HAPPY]);
+	drawAll(IMAGES[HAPPY]);
 }
 
 MyFace::~MyFace() {
