@@ -29,27 +29,35 @@ MyFace::~MyFace() {
 }
 
 void MyFace::drawAll(const byte image[]) {
+	// Write a 8x8 boolean 2D-Array to the LedMatrix
 	for (int i = 0; i < 8; i++) {
 		lc.setRow(0, i, image[i]);
 	}
 }
 
-void MyFace::blinkEyes(const int duration, const int depth = 0) {
-	// Serial.println("blink");
-	// Hardcoded blinking eyes "sprite"
-	EYES tempEyes = currentEyes;
-	closeEyes();
-	delay(duration);
-	switch (tempEyes) {
+void MyFace::drawEyes(EYES index) {
+	switch (index) {
 	case OPEN:
 		openEyes();
+		break;
+	case CLOSED:
+		closeEyes();
 		break;
 	case XES:
 		xEyes();
 		break;
 	}
-	if (random(0, 3 + depth) == 2) // Chance to flutter eyes. Chance decr. as depth incr.
-			{
+}
+
+void MyFace::blinkEyes(const int duration, const int depth = 0) {
+	// Serial.println("blink");
+	// Hard-coded blinking eyes "sprite"
+	EYES tempEyes = currentEyes;
+	closeEyes();
+	delay(duration);
+	drawEyes(tempEyes);
+	// Chance to flutter eyes. Chance decreases. as recursive depth increases
+	if (random(0, 3 + depth) == 2) {
 		delay(duration / 10);
 		blinkEyes(duration, depth + 1);
 	}
@@ -113,4 +121,22 @@ void MyFace::curlMouth(const bool curlRight) {
 		lc.setRow(0, 6, B00111110);
 	}
 	lc.setRow(0, 7, 0x00);
+}
+
+void MyFace::animateFace() {
+	static unsigned long lastBlink = 0L;
+	static unsigned long lastMouth = 0L;
+	if (millis() - lastBlink >= BLINK_PERIOD_MS) {
+		// Add a random number so blinks aren't regular
+		lastBlink = millis() - random(ANIMATION_FUZZ);
+		blinkEyes(BLINK_LENGTH);
+	}
+	if (millis() - lastMouth >= MOUTH_PERIOD_MS) {
+		lastMouth = millis() - random(ANIMATION_FUZZ);
+		if (random(0, 2)) {
+			smile();
+		} else {
+			curlMouth(random(0, 2));
+		}
+	}
 }

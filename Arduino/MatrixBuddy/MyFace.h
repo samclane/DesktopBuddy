@@ -84,6 +84,7 @@ public:
 	MyFace();
 	virtual ~MyFace();
 	void drawAll(const byte image[]);
+	void drawEyes(EYES index);
 	void blinkEyes(const int duration, const int depth = 0);
 	void closeEyes();
 	void openEyes();
@@ -92,6 +93,7 @@ public:
 	void neutralFace();
 	void frown();
 	void curlMouth(const bool curlRight);
+	void animateFace();
 };
 
 #endif /* MYFACE_H_ */

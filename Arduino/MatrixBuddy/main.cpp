@@ -5,7 +5,6 @@
  *      Author: SawyerPC
  */
 
-
 #include "main.h"
 
 void setup() {
@@ -16,7 +15,8 @@ void setup() {
 
 	randomSeed(analogRead(0));
 
-	attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), readAvoidSensor, CHANGE);
+	attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), readAvoidSensor,
+			CHANGE);
 }
 
 void readAvoidSensor() {
@@ -43,27 +43,9 @@ void avoidISR() {
 	readAvoidSensor();
 }
 
-void animateFace() {
-	static unsigned long lastBlink = 0L;
-	static unsigned long lastMouth = 0L;
-	if (millis() - lastBlink >= BLINK_PERIOD_MS) {
-		// Add a random number so blinks aren't regular
-		lastBlink = millis() - random(ANIMATION_FUZZ);
-		face.blinkEyes(BLINK_LENGTH);
-	}
-	if (millis() - lastMouth >= MOUTH_PERIOD_MS) {
-		lastMouth = millis() - random(ANIMATION_FUZZ);
-		if (random(0, 2)) {
-			face.smile();
-		} else {
-			face.curlMouth(random(0, 2));
-		}
-	}
-}
-
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
-		animateFace();
+		face.animateFace();
 	}
 }
 
