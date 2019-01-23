@@ -70,7 +70,7 @@ enum EYES {
 
 /* Animation frequency */
 const unsigned long BLINK_PERIOD_MS = 4000L;
-const unsigned long MOUTH_PERIOD_MS = 6000L;
+const unsigned long MOUTH_PERIOD_MS = 10000L;
 const unsigned long ANIMATION_FUZZ = 500L; // MS to fudge the animation to make it more realistic
 const unsigned long BLINK_LENGTH = 150L; // blink animation average duration
 

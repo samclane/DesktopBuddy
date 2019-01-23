@@ -23,8 +23,9 @@ int CS = 5;
 int AVOID_SENSE = 2;
 
 // Variables
+volatile byte AVOID_ISR_FLAG;
 volatile ConnectionStatus voiceConnected;
-MyFace face = MyFace(DIN, CLK, CS); //TODO  I don't want to initialize this here but it's making me
+MyFace face;
 
 // Function Definitions
 

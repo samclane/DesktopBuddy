@@ -24,6 +24,11 @@ MyFace::MyFace(const int din, const int clk, const int cs) :
 	drawAll(IMAGES[HAPPY]);
 }
 
+MyFace::MyFace() :
+		lc(LedControl(NULL, NULL, NULL)) {
+	// Dummy default constructor
+}
+
 MyFace::~MyFace() {
 	drawAll(IMAGES[ERROR]);
 }

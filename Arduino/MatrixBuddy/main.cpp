@@ -7,22 +7,27 @@
 
 #include "main.h"
 
+
 void setup() {
+	AVOID_ISR_FLAG = LOW;
 	voiceConnected = DISCONNECTED;
+	face = MyFace(DIN, CLK, CS);
 
 	Serial.begin(9600);
 	pinMode(AVOID_SENSE, INPUT);
 
 	randomSeed(analogRead(0));
 
-	attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), readAvoidSensor,
-			CHANGE);
+	attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), avoidISR,
+	CHANGE);
+
+	face.drawAll(IMAGES[HAPPY]);
 }
 
 void readAvoidSensor() {
 	static unsigned long lastDebounceTime = 0;
 	static byte lastByteSent = 0x00;
-	const static unsigned long debounceDelay = 100;
+	const static unsigned long debounceDelay = 150;
 	if (millis() - lastDebounceTime > debounceDelay) {
 		if (voiceConnected == DISCONNECTED) {
 			if (face.currentEyes == OPEN) {
@@ -40,11 +45,17 @@ void readAvoidSensor() {
 }
 
 void avoidISR() {
+	AVOID_ISR_FLAG = HIGH;
 	readAvoidSensor();
+	AVOID_ISR_FLAG = LOW;
 }
 
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
+		if (digitalRead(AVOID_SENSE) && face.currentEyes == XES && AVOID_ISR_FLAG == LOW) {
+			Serial.println("Fixing eyes...");
+			face.openEyes();
+		}
 		face.animateFace();
 	}
 }
@@ -72,13 +83,12 @@ void serialEvent() {
 		case DEAFENED:
 			face.drawAll(IMAGES[STOP]);
 			break;
-		default:
-			face.drawAll(IMAGES[ERROR]);
 		}
 		voiceConnected = (ConnectionStatus) incomingByte;
 	}
 	// Unsupported protocol code; display error
 	else {
-		face.drawAll(IMAGES[ERROR]);
+		Serial.print("Unused symbol: ");
+		Serial.println(incomingByte, DEC);
 	}
 }
