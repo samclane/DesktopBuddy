@@ -60,12 +60,57 @@ const byte IMAGES[][8] = {
 };
 const int IMAGES_LEN = sizeof(IMAGES) / 8;
 
+const byte MASKS[][8] = {
+		{
+		  B11100000,
+		  B11100000,
+		  B11100000,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000
+		},{
+		  B00000111,
+		  B00000111,
+		  B00000111,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000
+		},{
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B11111111,
+		  B11111111,
+		  B11111111
+		},{
+		  B11100111,
+		  B11100111,
+		  B11100111,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000,
+		  B00000000
+		}
+};
+const int MASKS_LEN = sizeof(MASKS) / 8;
+
 enum EMOTES {
 	HAPPY, ERROR, PLAY, STOP, PAUSE
 };
 
 enum EYES {
 	OPEN, CLOSED, XES
+};
+
+enum MASKS {
+	L_EYE, R_EYE, MOUTH, BOTH_EYES
 };
 
 /* Animation frequency */
@@ -77,6 +122,7 @@ const unsigned long BLINK_LENGTH = 150L; // blink animation average duration
 class MyFace {
 private:
 	LedControl lc;
+	byte currentMatrix[8];
 public:
 	volatile EYES currentEyes;
 	volatile EMOTES currentFace;
@@ -94,6 +140,7 @@ public:
 	void frown();
 	void curlMouth(const bool curlRight);
 	void animateFace();
+	void transform(const byte desired[8], const byte mask[8]);
 };
 
 #endif /* MYFACE_H_ */

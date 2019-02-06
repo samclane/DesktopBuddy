@@ -11,6 +11,7 @@ MyFace::MyFace(const int din, const int clk, const int cs) :
 		lc(LedControl(din, clk, cs)) {
 	currentEyes = OPEN;
 	currentFace = HAPPY;
+	memcpy(currentMatrix, IMAGES[HAPPY], sizeof(byte)*8);
 	/*
 	 The MAX72XX is in power-saving mode on startup,
 	 we have to do a wakeup call
@@ -38,6 +39,7 @@ void MyFace::drawAll(const byte image[]) {
 	for (int i = 0; i < 8; i++) {
 		lc.setRow(0, i, image[i]);
 	}
+	memcpy(this->currentMatrix, image, sizeof(byte)*8);
 }
 
 void MyFace::drawEyes(EYES index) {
@@ -144,4 +146,23 @@ void MyFace::animateFace() {
 			curlMouth(random(0, 2));
 		}
 	}
+}
+
+
+void MyFace::transform(const byte desired[8], const byte mask[8]) {
+int i, j;
+byte output[8];
+	memcpy(output, this->currentMatrix, sizeof(byte)*8);
+	for (i=0; i<8; i++) {
+		for (j=7; j>=0; j--) {
+			if (bitRead(mask[i], j)) {
+				output[i] ^= (-bitRead(desired[i], j) ^ output[i]) & (1UL << j);
+			} // else keep the current value
+			Serial.print(bitRead(output[i], j) ? "X" : "-");
+		}
+		Serial.println();
+	}
+	drawAll(output);
+	Serial.println("________");
+	memcpy(this->currentMatrix, output, sizeof(byte)*8);
 }

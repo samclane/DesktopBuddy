@@ -7,7 +7,6 @@
 
 #include "main.h"
 
-
 void setup() {
 	AVOID_ISR_FLAG = LOW;
 	voiceConnected = DISCONNECTED;
@@ -18,8 +17,9 @@ void setup() {
 
 	randomSeed(analogRead(0));
 
-	attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), avoidISR,
-	CHANGE);
+	// TODO Removed avoid sensor for other testing.
+	//attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), avoidISR,
+	//CHANGE);
 
 	face.drawAll(IMAGES[HAPPY]);
 }
@@ -52,7 +52,8 @@ void avoidISR() {
 
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
-		if (digitalRead(AVOID_SENSE) && face.currentEyes == XES && AVOID_ISR_FLAG == LOW) {
+		if (digitalRead(
+				AVOID_SENSE) && face.currentEyes == XES && AVOID_ISR_FLAG == LOW) {
 			Serial.println("Fixing eyes...");
 			face.openEyes();
 		}
@@ -67,28 +68,30 @@ void serialEvent() {
 	if (isDigit) {
 		incomingByte = ch - '0';
 	}
-	// Draw the corresponding image (debug; will probably remove)
-	if (incomingByte < ConnectionStatusLength) {
-		switch (incomingByte) {
+	switch (incomingByte) {
 		case DISCONNECTED: // Reset Face
 			face.drawAll(IMAGES[HAPPY]);
 			face.currentFace = HAPPY;
 			break;
 		case CONNECTED:
 			face.drawAll(IMAGES[PLAY]);
+			face.currentFace = PLAY;
 			break;
 		case MUTED:
 			face.drawAll(IMAGES[PAUSE]);
+			face.currentFace = PAUSE;
 			break;
 		case DEAFENED:
 			face.drawAll(IMAGES[STOP]);
+			face.currentFace = STOP;
 			break;
-		}
-		voiceConnected = (ConnectionStatus) incomingByte;
+		//case ConnectionStatusLength:
+		//	face.transform(IMAGES[random(0, IMAGES_LEN)], MASKS[BOTH_EYES]);
+		//	face.transform(IMAGES[random(0, IMAGES_LEN)], MASKS[MOUTH]);
+			break;
+		default:
+			Serial.print("Unused symbol: ");
+			Serial.println(incomingByte, DEC);
 	}
-	// Unsupported protocol code; display error
-	else {
-		Serial.print("Unused symbol: ");
-		Serial.println(incomingByte, DEC);
-	}
+	voiceConnected = (ConnectionStatus) incomingByte;
 }
