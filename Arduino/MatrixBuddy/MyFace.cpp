@@ -140,7 +140,7 @@ void MyFace::curlMouth(const bool curlRight) {
 	const byte curlL[8] = {
 			0,0,0,0,0,
 			B01000000,
-			B00111100
+			B00111110
 	};
 	if (curlRight) {
 		// Serial.println("_R");
