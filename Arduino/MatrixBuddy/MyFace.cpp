@@ -11,7 +11,7 @@ MyFace::MyFace(const int din, const int clk, const int cs) :
 		lc(LedControl(din, clk, cs)) {
 	currentEyes = OPEN;
 	currentFace = HAPPY;
-	memcpy(currentMatrix, IMAGES[HAPPY], sizeof(byte)*8);
+	memcpy(currentMatrix, IMAGES[HAPPY], sizeof(byte) * 8);
 	/*
 	 The MAX72XX is in power-saving mode on startup,
 	 we have to do a wakeup call
@@ -39,7 +39,7 @@ void MyFace::drawAll(const byte image[]) {
 	for (int i = 0; i < 8; i++) {
 		lc.setRow(0, i, image[i]);
 	}
-	memcpy(this->currentMatrix, image, sizeof(byte)*8);
+	memcpy(this->currentMatrix, image, sizeof(byte) * 8);
 }
 
 void MyFace::drawEyes(EYES index) {
@@ -71,21 +71,17 @@ void MyFace::blinkEyes(const int duration, const int depth = 0) {
 }
 
 void MyFace::closeEyes() {
-	const byte closedEyes[8] = {
-		0, 0,
-		B11000011
-	};
+	const byte closedEyes[8] = { 0, 0,
+	B11000011 };
 	this->transform(closedEyes, MASKS[BOTH_EYES]);
-	currentEyes = CLOSED;
+	// currentEyes = CLOSED;
 }
 
 void MyFace::openEyes() {
 	// Serial.println("open-eyes");b
-	const byte openEyes[8] = {
-			0,
-			B11000011,
-			B11000011
-	};
+	const byte openEyes[8] = { 0,
+	B11000011,
+	B11000011 };
 	this->transform(openEyes, MASKS[BOTH_EYES]);
 	currentEyes = OPEN;
 }
@@ -93,55 +89,44 @@ void MyFace::openEyes() {
 void MyFace::xEyes() {
 	// Serial.println("x-eyes");
 	const byte xEyes[8] = {
-			B10100101,
-			B01000010,
-			B10100101
-	};
+	B10100101,
+	B01000010,
+	B10100101 };
 	this->transform(xEyes, MASKS[BOTH_EYES]);
 	currentEyes = XES;
 }
 
 void MyFace::smile() {
 	// Serial.println("smile");
-	const byte smile[8] = {
-			0,0,0,0,0,
-			B01000010,
-			B00111100
-	};
+	const byte smile[8] = { 0, 0, 0, 0, 0,
+	B01000010,
+	B00111100 };
 	this->transform(smile, MASKS[MOUTH]);
 }
 
 void MyFace::neutralFace() {
 	// Serial.println("neutral");
-	const byte neutral[8] = {
-			0,0,0,0,0,0,
-			B00111100
-	};
+	const byte neutral[8] = { 0, 0, 0, 0, 0, 0,
+	B00111100 };
 	this->transform(neutral, MASKS[MOUTH]);
 }
 
 void MyFace::frown() {
 	// Serial.println("frown");
-	const byte frown[8] = {
-		0,0,0,0,0,0,
-		B00111100,
-		B01000010
-	};
+	const byte frown[8] = { 0, 0, 0, 0, 0, 0,
+	B00111100,
+	B01000010 };
 	this->transform(frown, MASKS[MOUTH]);
 }
 
 void MyFace::curlMouth(const bool curlRight) {
 	// Serial.print("curl");
-	const byte curlR[8] = {
-			0,0,0,0,0,
-			B00000010,
-			B01111100
-	};
-	const byte curlL[8] = {
-			0,0,0,0,0,
-			B01000000,
-			B00111110
-	};
+	const byte curlR[8] = { 0, 0, 0, 0, 0,
+	B00000010,
+	B01111100 };
+	const byte curlL[8] = { 0, 0, 0, 0, 0,
+	B01000000,
+	B00111110 };
 	if (curlRight) {
 		// Serial.println("_R");
 		this->transform(curlR, MASKS[MOUTH]);
@@ -170,20 +155,19 @@ void MyFace::animateFace() {
 	}
 }
 
-
 void MyFace::transform(const byte desired[8], const byte mask[8]) {
 	int i, j;
 	byte output[8];
-	memcpy(output, this->currentMatrix, sizeof(byte)*8);
-	for (i=0; i<8; i++) {
-		for (j=7; j>=0; j--) {
+	memcpy(output, this->currentMatrix, sizeof(byte) * 8);
+	for (i = 0; i < 8; i++) {
+		for (j = 7; j >= 0; j--) {
 			if (bitRead(mask[i], j)) {
-				output[i] ^= (-bitRead(desired[i], j) ^ output[i]) & (1UL << j);
+				output[i] ^= (-bitRead(desired[i], j) ^ output[i]) & bit(j);
 			} // else keep the current value
-			Serial.print(bitRead(output[i], j) ? "X" : "-");
+			//Serial.print(bitRead(output[i], j) ? "X" : "-");
 		}
-		Serial.println();
+		//Serial.println();
 	}
 	drawAll(output);
-	Serial.println("________");
+	// Serial.println("________");
 }

@@ -8,31 +8,32 @@
 #include "main.h"
 
 void setup() {
-	AVOID_ISR_FLAG = LOW;
 	voiceConnected = DISCONNECTED;
 	face = MyFace(DIN, CLK, CS);
 
 	Serial.begin(9600);
-	pinMode(AVOID_SENSE, INPUT);
+	pinMode(INTR_SENSE, INPUT);
+
+
+	// TODO Causes display lag when enabled
+	attachInterrupt(digitalPinToInterrupt(INTR_SENSE), senseISR, RISING);
+
 
 	randomSeed(analogRead(0));
-
-	// TODO Removed avoid sensor for other testing.
-	//attachInterrupt(digitalPinToInterrupt(AVOID_SENSE), avoidISR,
-	//CHANGE);
 
 	face.drawAll(IMAGES[HAPPY]);
 }
 
-void readAvoidSensor() {
+void readInterruptSensor() {
 	static unsigned long lastDebounceTime = 0;
 	static byte lastByteSent = 0x00;
-	const static unsigned long debounceDelay = 150;
+	const static unsigned long debounceDelay = 250;
 	if (millis() - lastDebounceTime > debounceDelay) {
 		if (voiceConnected == DISCONNECTED) {
 			if (face.currentEyes == OPEN) {
 				face.xEyes();
-			} else {
+			}
+			else if (face.currentEyes == XES) {
 				face.openEyes();
 			}
 		} else {
@@ -44,19 +45,16 @@ void readAvoidSensor() {
 	}
 }
 
-void avoidISR() {
-	AVOID_ISR_FLAG = HIGH;
-	readAvoidSensor();
-	AVOID_ISR_FLAG = LOW;
+void senseISR() {
+	SENSE_ISR_FLAG = 0x01;
 }
 
 void loop() {
-	if (voiceConnected == DISCONNECTED) {
-		if (digitalRead(
-				AVOID_SENSE) && face.currentEyes == XES && AVOID_ISR_FLAG == LOW) {
-			Serial.println("Fixing eyes...");
-			face.openEyes();
-		}
+	if (SENSE_ISR_FLAG > 0x00) {
+		readInterruptSensor();
+		SENSE_ISR_FLAG = 0x00;
+	}
+	else if (voiceConnected == DISCONNECTED) {
 		face.animateFace();
 	}
 }
@@ -88,7 +86,7 @@ void serialEvent() {
 		//case ConnectionStatusLength:
 		//	face.transform(IMAGES[random(0, IMAGES_LEN)], MASKS[BOTH_EYES]);
 		//	face.transform(IMAGES[random(0, IMAGES_LEN)], MASKS[MOUTH]);
-			break;
+		//	break;
 		default:
 			Serial.print("Unused symbol: ");
 			Serial.println(incomingByte, DEC);

@@ -20,17 +20,17 @@ enum ConnectionStatus {
 int DIN = 3;
 int CLK = 6;
 int CS = 5;
-int AVOID_SENSE = 2;
+int INTR_SENSE = 2;
 
 // Variables
-volatile byte AVOID_ISR_FLAG;
+volatile byte SENSE_ISR_FLAG = 0;
 volatile ConnectionStatus voiceConnected;
 MyFace face;
 
 // Function Definitions
 
-void avoidISR();
-void readAvoidSensor();
+void senseISR();
+void readInterruptSensor();
 void animateFace();
 
 #endif
