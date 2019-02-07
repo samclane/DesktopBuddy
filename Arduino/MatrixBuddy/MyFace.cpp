@@ -71,63 +71,85 @@ void MyFace::blinkEyes(const int duration, const int depth = 0) {
 }
 
 void MyFace::closeEyes() {
-	lc.setRow(0, 0, 0x00);
-	lc.setRow(0, 1, 0x00);
-	lc.setRow(0, 2, B11000011);
-	lc.setRow(0, 3, 0x00);
+	const byte closedEyes[8] = {
+		0, 0,
+		B11000011
+	};
+	this->transform(closedEyes, MASKS[BOTH_EYES]);
 	currentEyes = CLOSED;
 }
 
 void MyFace::openEyes() {
-	// Serial.println("open-eyes");
-	lc.setRow(0, 0, 0x00);
-	lc.setRow(0, 1, B11000011);
-	lc.setRow(0, 2, B11000011);
-	lc.setRow(0, 3, 0x00);
+	// Serial.println("open-eyes");b
+	const byte openEyes[8] = {
+			0,
+			B11000011,
+			B11000011
+	};
+	this->transform(openEyes, MASKS[BOTH_EYES]);
 	currentEyes = OPEN;
 }
 
 void MyFace::xEyes() {
 	// Serial.println("x-eyes");
-	lc.setRow(0, 0, B10100101);
-	lc.setRow(0, 1, B01000010);
-	lc.setRow(0, 2, B10100101);
+	const byte xEyes[8] = {
+			B10100101,
+			B01000010,
+			B10100101
+	};
+	this->transform(xEyes, MASKS[BOTH_EYES]);
 	currentEyes = XES;
 }
 
 void MyFace::smile() {
 	// Serial.println("smile");
-	lc.setRow(0, 5, B01000010);
-	lc.setRow(0, 6, B00111100);
-	lc.setRow(0, 7, 0x00);
+	const byte smile[8] = {
+			0,0,0,0,0,
+			B01000010,
+			B00111100
+	};
+	this->transform(smile, MASKS[MOUTH]);
 }
 
 void MyFace::neutralFace() {
 	// Serial.println("neutral");
-	lc.setRow(0, 5, 0x00);
-	lc.setRow(0, 6, B01111110);
-	lc.setRow(0, 7, 0x00);
+	const byte neutral[8] = {
+			0,0,0,0,0,0,
+			B00111100
+	};
+	this->transform(neutral, MASKS[MOUTH]);
 }
 
 void MyFace::frown() {
 	// Serial.println("frown");
-	lc.setRow(0, 5, 0x00);
-	lc.setRow(0, 6, B00111100);
-	lc.setRow(0, 7, B01000010);
+	const byte frown[8] = {
+		0,0,0,0,0,0,
+		B00111100,
+		B01000010
+	};
+	this->transform(frown, MASKS[MOUTH]);
 }
 
 void MyFace::curlMouth(const bool curlRight) {
 	// Serial.print("curl");
+	const byte curlR[8] = {
+			0,0,0,0,0,
+			B00000010,
+			B01111100
+	};
+	const byte curlL[8] = {
+			0,0,0,0,0,
+			B01000000,
+			B00111100
+	};
 	if (curlRight) {
 		// Serial.println("_R");
-		lc.setRow(0, 5, B00000010);
-		lc.setRow(0, 6, B01111100);
+		this->transform(curlR, MASKS[MOUTH]);
+
 	} else {  // curl left
 		// Serial.println("_L");
-		lc.setRow(0, 5, B01000000);
-		lc.setRow(0, 6, B00111110);
+		this->transform(curlL, MASKS[MOUTH]);
 	}
-	lc.setRow(0, 7, 0x00);
 }
 
 void MyFace::animateFace() {
@@ -150,8 +172,8 @@ void MyFace::animateFace() {
 
 
 void MyFace::transform(const byte desired[8], const byte mask[8]) {
-int i, j;
-byte output[8];
+	int i, j;
+	byte output[8];
 	memcpy(output, this->currentMatrix, sizeof(byte)*8);
 	for (i=0; i<8; i++) {
 		for (j=7; j>=0; j--) {
@@ -164,5 +186,4 @@ byte output[8];
 	}
 	drawAll(output);
 	Serial.println("________");
-	memcpy(this->currentMatrix, output, sizeof(byte)*8);
 }
