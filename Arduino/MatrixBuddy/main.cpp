@@ -48,8 +48,10 @@ void senseISR() {
 
 void loop() {
 	if (SENSE_ISR_FLAG > 0x00) {
+		noInterrupts();
 		processInterrupt();
 		SENSE_ISR_FLAG = 0x00;
+		interrupts();
 	}
 	else if (voiceConnected == DISCONNECTED) {
 		face.animateFace();
