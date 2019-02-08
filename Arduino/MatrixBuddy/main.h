@@ -9,7 +9,6 @@
 #define MAIN_H_
 
 #include "Arduino.h"
-
 #include "MyFace.h"
 
 enum ConnectionStatus {
@@ -30,7 +29,7 @@ MyFace face;
 // Function Definitions
 
 void senseISR();
-void readInterruptSensor();
+void processInterrupt();
 void animateFace();
 
 #endif
