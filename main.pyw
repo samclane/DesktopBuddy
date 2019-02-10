@@ -54,6 +54,7 @@ class DiscordListener:
 
         self.voice_state = DISCONNECTED
         self.attempt_login()
+        self.update_status()
 
     @staticmethod
     def get_arduino_port():

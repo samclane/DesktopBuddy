@@ -12,9 +12,9 @@ void setup() {
 	face = MyFace(DIN, CLK, CS);
 
 	Serial.begin(9600);
-	pinMode(INTR_SENSE, INPUT);
+	pinMode(INTR_SENSE, INPUT_PULLUP);
 
-	attachInterrupt(digitalPinToInterrupt(INTR_SENSE), senseISR, RISING);
+	attachInterrupt(digitalPinToInterrupt(INTR_SENSE), senseISR, FALLING);
 
 	randomSeed(analogRead(0));
 
@@ -22,36 +22,37 @@ void setup() {
 }
 
 void processInterrupt() {
-	static byte lastByteSent = 0x00;
-	if (voiceConnected == DISCONNECTED) {
-		if (face.currentEyes == OPEN) {
-			face.xEyes();
-		}
-		else if (face.currentEyes == XES) {
-			face.openEyes();
-		}
-	} else {
-		// We're connected to Discord; Send serial signal to PC for mute
-		lastByteSent = ~lastByteSent;
-		Serial.write(lastByteSent);
-	}
-}
-
-void senseISR() {
 	static size_t lastDebounceTime = 0;
-	const size_t debounceDelay = 200;
+	const size_t debounceDelay = 1000;
 	if (millis() - lastDebounceTime > debounceDelay) {
-		SENSE_ISR_FLAG = 0x01;
+		if (voiceConnected == DISCONNECTED) {
+			if (face.currentEyes == OPEN) {
+				face.xEyes();
+			}
+			else if (face.currentEyes == XES) {
+				face.openEyes();
+			}
+		}
+		else {
+			/* 0: Toggle Mute */
+			Serial.write(0);
+		}
 		lastDebounceTime = millis();
 	}
 }
 
+void senseISR() {
+	SENSE_ISR_FLAG = 0x01;
+}
+
 void loop() {
 	if (SENSE_ISR_FLAG > 0x00) {
+		// To clear the flag, we enter a critical section
 		noInterrupts();
 		processInterrupt();
 		SENSE_ISR_FLAG = 0x00;
 		interrupts();
+		// End crit section
 	}
 	else if (voiceConnected == DISCONNECTED) {
 		face.animateFace();
