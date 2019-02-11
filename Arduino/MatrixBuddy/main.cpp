@@ -25,7 +25,6 @@ void processInterrupt() {
 	if (voiceConnected != DISCONNECTED) {
 		/* 0: Toggle Mute */
 		Serial.write(0x00);
-		Serial.println(millis());
 	}
 	else {
 		if (face.currentEyes == OPEN) {
@@ -48,9 +47,9 @@ void senseISR() {
 }
 
 void loop() {
-if (voiceConnected == DISCONNECTED) {
-		face.animateFace();
-	}
+	if (voiceConnected == DISCONNECTED) {
+			face.animateFace();
+		}
 }
 
 void serialEvent() {
