@@ -32,8 +32,7 @@ class DiscordListener:
         if not os.path.isfile("config.ini"):
             copyfile("default.ini", "config.ini")
         self.config.read("config.ini")
-        self.username = self.config['LoginInfo']['Username']
-        self.password = self.config['LoginInfo']['Password']
+        self.token = self.config['LoginInfo']['Token']
 
         self.port = self.get_arduino_port()
         self.ser = serial.Serial(self.port, timeout=0)
@@ -98,10 +97,10 @@ class DiscordListener:
         self.sched.enter(REFRESH_RATE, 1, self.update_status)
 
     def attempt_login(self):
-        logging.info("Attempting to log in as {}".format(self.username))
+        logging.info("Attempting to log in with token {}".format(self.token))
         if self.threads.get("client_thread"):
             self.client.logout()
-        client_thread = threading.Thread(target=self.client.run, args=(self.username, self.password), daemon=True)
+        client_thread = threading.Thread(target=self.client.run, args=(self.token,), kwargs={"bot": False}, daemon=True)
         client_thread.start()
         self.threads["client_thread"] = client_thread
         logging.info("Login successful!")
