@@ -19,7 +19,7 @@ enum ConnectionStatus {
 int DIN = 4;
 int CLK = 6;
 int CS = 5;
-int INTR_SENSE = 3;
+int INTR_SENSE_1 = 3;
 
 // Variables
 volatile ConnectionStatus voiceConnected;
@@ -27,7 +27,7 @@ MyFace face;
 
 // Function Definitions
 
-void senseISR();
+void senseISR1();
 void processInterrupt();
 void animateFace();
 

@@ -53,7 +53,6 @@ class DiscordListener:
 
         self.voice_state = -1
         self.attempt_login()
-        self.update_status()
 
     @staticmethod
     def get_arduino_port():
@@ -117,6 +116,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # If we have any exception, the program restarts
     while True:
         try:
             main()

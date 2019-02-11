@@ -12,9 +12,9 @@ void setup() {
 	face = MyFace(DIN, CLK, CS);
 
 	Serial.begin(9600);
-	pinMode(INTR_SENSE, INPUT_PULLUP);
+	pinMode(INTR_SENSE_1, INPUT_PULLUP);
 
-	attachInterrupt(digitalPinToInterrupt(INTR_SENSE), senseISR, FALLING);
+	attachInterrupt(digitalPinToInterrupt(INTR_SENSE_1), senseISR1, FALLING);
 
 	randomSeed(analogRead(0));
 
@@ -37,7 +37,7 @@ void processInterrupt() {
 
 }
 
-void senseISR() {
+void senseISR1() {
 	static unsigned long lastDebounceTime = 0;
 	const unsigned long debounceDelay = 1000;
 	if (millis() - lastDebounceTime > debounceDelay) {
@@ -49,7 +49,7 @@ void senseISR() {
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
 			face.animateFace();
-		}
+	}
 }
 
 void serialEvent() {

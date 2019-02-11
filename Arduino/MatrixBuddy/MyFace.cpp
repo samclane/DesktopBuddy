@@ -71,9 +71,14 @@ void MyFace::blinkEyes(const int duration, const int depth = 0) {
 }
 
 void MyFace::closeEyes() {
-	const byte closedEyes[8] = { 0, 0,
+	const byte closedEyes2[8] = { 0, 0,
 	B11000011 };
-	this->transform(closedEyes, MASKS[BOTH_EYES]);
+	const byte closedEyes3[8] = { 0, 0,
+	B11100111 };
+	if (this->currentEyes == XES)
+		this->transform(closedEyes3, MASKS[BOTH_EYES]);
+	else
+		this->transform(closedEyes2, MASKS[BOTH_EYES]);
 	// currentEyes = CLOSED;
 }
 
@@ -82,6 +87,7 @@ void MyFace::openEyes() {
 	const byte openEyes[8] = { 0,
 	B11000011,
 	B11000011 };
+
 	this->transform(openEyes, MASKS[BOTH_EYES]);
 	currentEyes = OPEN;
 }
