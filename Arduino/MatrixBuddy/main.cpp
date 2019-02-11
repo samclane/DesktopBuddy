@@ -22,39 +22,33 @@ void setup() {
 }
 
 void processInterrupt() {
-	static size_t lastDebounceTime = 0;
-	const size_t debounceDelay = 1000;
-	if (millis() - lastDebounceTime > debounceDelay) {
-		if (voiceConnected == DISCONNECTED) {
-			if (face.currentEyes == OPEN) {
-				face.xEyes();
-			}
-			else if (face.currentEyes == XES) {
-				face.openEyes();
-			}
-		}
-		else {
-			/* 0: Toggle Mute */
-			Serial.write(0);
-		}
-		lastDebounceTime = millis();
+	if (voiceConnected != DISCONNECTED) {
+		/* 0: Toggle Mute */
+		Serial.write(0x00);
+		Serial.println(millis());
 	}
+	else {
+		if (face.currentEyes == OPEN) {
+			face.xEyes();
+		}
+		else if (face.currentEyes == XES) {
+			face.openEyes();
+		}
+	}
+
 }
 
 void senseISR() {
-	SENSE_ISR_FLAG = 0x01;
+	static unsigned long lastDebounceTime = 0;
+	const unsigned long debounceDelay = 1000;
+	if (millis() - lastDebounceTime > debounceDelay) {
+		lastDebounceTime = millis();
+		processInterrupt();
+	}
 }
 
 void loop() {
-	if (SENSE_ISR_FLAG > 0x00) {
-		// To clear the flag, we enter a critical section
-		noInterrupts();
-		processInterrupt();
-		SENSE_ISR_FLAG = 0x00;
-		interrupts();
-		// End crit section
-	}
-	else if (voiceConnected == DISCONNECTED) {
+if (voiceConnected == DISCONNECTED) {
 		face.animateFace();
 	}
 }
@@ -84,8 +78,9 @@ void serialEvent() {
 			face.currentFace = STOP;
 			break;
 		default:
-			Serial.print("Unused symbol: ");
-			Serial.println(incomingByte, DEC);
+			//Serial.print("Unused symbol: ");
+			//Serial.println(incomingByte, DEC);
+			break;
 	}
 	voiceConnected = (ConnectionStatus) incomingByte;
 }

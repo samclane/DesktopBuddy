@@ -52,7 +52,7 @@ class DiscordListener:
         tray_thread.start()
         self.threads["tray_thread"] = tray_thread
 
-        self.voice_state = DISCONNECTED
+        self.voice_state = -1
         self.attempt_login()
         self.update_status()
 
@@ -89,7 +89,7 @@ class DiscordListener:
         if self.voice_state != state:
             self.voice_state = state
             self.ser.write(str(state).encode())
-            logging.info("Serial TX: {}".format(str(state)))
+            logging.info("Serial TX: {}".format(str(state).encode()))
         if self.ser.in_waiting:
             byte_in = self.ser.read()
             logging.info("Serial RX: {}".format(str(byte_in)))

@@ -16,13 +16,12 @@ enum ConnectionStatus {
 };
 
 /* Pinouts */
-int DIN = 3;
+int DIN = 4;
 int CLK = 6;
 int CS = 5;
-int INTR_SENSE = 2;
+int INTR_SENSE = 3;
 
 // Variables
-volatile byte SENSE_ISR_FLAG = 0;
 volatile ConnectionStatus voiceConnected;
 MyFace face;
 
