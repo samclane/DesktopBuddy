@@ -75,7 +75,7 @@ void MyFace::closeEyes() {
 	B11000011 };
 	const byte closedEyes3[8] = { 0, 0,
 	B11100111 };
-	if (this->currentEyes == XES)
+	if (this->currentEyes == XES) // X is 3-wide; looks weird if we blink 2-wide
 		this->transform(closedEyes3, MASKS[BOTH_EYES]);
 	else
 		this->transform(closedEyes2, MASKS[BOTH_EYES]);
@@ -170,7 +170,7 @@ void MyFace::transform(const byte desired[8], const byte mask[8]) {
 			if (bitRead(mask[i], j)) {
 				output[i] ^= (-bitRead(desired[i], j) ^ output[i]) & bit(j);
 			} // else keep the current value
-			//Serial.print(bitRead(output[i], j) ? "X" : "-");
+			  //Serial.print(bitRead(output[i], j) ? "X" : "-");
 		}
 		//Serial.println();
 	}

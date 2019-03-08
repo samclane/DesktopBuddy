@@ -8,29 +8,43 @@
 #include "main.h"
 
 void setup() {
-	voiceConnected = DISCONNECTED;
-	face = MyFace(DIN, CLK, CS);
-
 	Serial.begin(9600);
+
+	pinMode(DIN, OUTPUT);
+	pinMode(CLK, OUTPUT);
+	pinMode(CS, OUTPUT);
+	pinMode(SPEAKER, OUTPUT);
 	pinMode(INTR_SENSE_1, INPUT_PULLUP);
+
+	voiceConnected = DISCONNECTED;
+
+	face = MyFace(DIN, CLK, CS);
+	neck = &MyNeck(SERVO_TOP, SERVO_BOTTOM);
 
 	attachInterrupt(digitalPinToInterrupt(INTR_SENSE_1), senseISR1, FALLING);
 
 	randomSeed(analogRead(0));
 
 	face.drawAll(IMAGES[HAPPY]);
+	neck->resetPose();
 }
 
 void processInterrupt() {
 	if (voiceConnected != DISCONNECTED) {
 		/* 0: Toggle Mute */
 		Serial.write(0x00);
-	}
-	else {
+		switch (voiceConnected) {
+		case CONNECTED:
+			voice.say(spGOODBYE);
+			break;
+		case MUTED:
+		case DEAFENED:
+			voice.say(spHELLO);
+		}
+	} else {
 		if (face.currentEyes == OPEN) {
 			face.xEyes();
-		}
-		else if (face.currentEyes == XES) {
+		} else if (face.currentEyes == XES) {
 			face.openEyes();
 		}
 	}
@@ -48,7 +62,8 @@ void senseISR1() {
 
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
-			face.animateFace();
+		//neck->animateNeck();
+		face.animateFace();
 	}
 }
 
@@ -60,26 +75,24 @@ void serialEvent() {
 		incomingByte = ch - '0';
 	}
 	switch (incomingByte) {
-		case DISCONNECTED: // Reset Face
-			face.drawAll(IMAGES[HAPPY]);
-			face.currentFace = HAPPY;
-			break;
-		case CONNECTED:
-			face.drawAll(IMAGES[PLAY]);
-			face.currentFace = PLAY;
-			break;
-		case MUTED:
-			face.drawAll(IMAGES[PAUSE]);
-			face.currentFace = PAUSE;
-			break;
-		case DEAFENED:
-			face.drawAll(IMAGES[STOP]);
-			face.currentFace = STOP;
-			break;
-		default:
-			//Serial.print("Unused symbol: ");
-			//Serial.println(incomingByte, DEC);
-			break;
+	case DISCONNECTED: // Reset Face
+		face.drawAll(IMAGES[HAPPY]);
+		face.currentFace = HAPPY;
+		break;
+	case CONNECTED:
+		face.drawAll(IMAGES[PLAY]);
+		face.currentFace = PLAY;
+		break;
+	case MUTED:
+		face.drawAll(IMAGES[PAUSE]);
+		face.currentFace = PAUSE;
+		break;
+	case DEAFENED:
+		face.drawAll(IMAGES[STOP]);
+		face.currentFace = STOP;
+		break;
+	default:
+		break;
 	}
 	voiceConnected = (ConnectionStatus) incomingByte;
 }
