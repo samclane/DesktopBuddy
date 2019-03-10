@@ -62,8 +62,8 @@ void senseISR1() {
 
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
-		//neck->animateNeck();
-		face.animateFace();
+		neck->animateNeck();
+		face.animateFace();  // Something about this function makes neck fail
 	}
 }
 
@@ -82,14 +82,17 @@ void serialEvent() {
 	case CONNECTED:
 		face.drawAll(IMAGES[PLAY]);
 		face.currentFace = PLAY;
+		neck->resetPose();
 		break;
 	case MUTED:
 		face.drawAll(IMAGES[PAUSE]);
 		face.currentFace = PAUSE;
+		neck->resetPose();
 		break;
 	case DEAFENED:
 		face.drawAll(IMAGES[STOP]);
 		face.currentFace = STOP;
+		neck->resetPose();
 		break;
 	default:
 		break;

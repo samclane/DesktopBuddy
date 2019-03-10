@@ -18,7 +18,7 @@ MyFace::MyFace(const int din, const int clk, const int cs) :
 	 */
 	lc.shutdown(0, false);
 	/* Set the brightness to a medium values */
-	lc.setIntensity(0, 1);
+	lc.setIntensity(0, 0);
 	/* and clear the display */
 	lc.clearDisplay(0);
 
@@ -34,12 +34,12 @@ MyFace::~MyFace() {
 	drawAll(IMAGES[ERROR]);
 }
 
-void MyFace::drawAll(const byte image[]) {
+void MyFace::drawAll(const byte image[8]) {
 	// Write a 8x8 boolean 2D-Array to the LedMatrix
 	for (int i = 0; i < 8; i++) {
 		lc.setRow(0, i, image[i]);
 	}
-	memcpy(this->currentMatrix, image, sizeof(byte) * 8);
+	memcpy(currentMatrix, image, sizeof(byte) * 8);
 }
 
 void MyFace::drawEyes(EYES index) {
@@ -75,10 +75,10 @@ void MyFace::closeEyes() {
 	B11000011 };
 	const byte closedEyes3[8] = { 0, 0,
 	B11100111 };
-	if (this->currentEyes == XES) // X is 3-wide; looks weird if we blink 2-wide
-		this->transform(closedEyes3, MASKS[BOTH_EYES]);
+	if (currentEyes == XES) // X is 3-wide; looks weird if we blink 2-wide
+		transform(closedEyes3, MASKS[BOTH_EYES]);
 	else
-		this->transform(closedEyes2, MASKS[BOTH_EYES]);
+		transform(closedEyes2, MASKS[BOTH_EYES]);
 	// currentEyes = CLOSED;
 }
 
@@ -88,7 +88,7 @@ void MyFace::openEyes() {
 	B11000011,
 	B11000011 };
 
-	this->transform(openEyes, MASKS[BOTH_EYES]);
+	transform(openEyes, MASKS[BOTH_EYES]);
 	currentEyes = OPEN;
 }
 
@@ -98,7 +98,7 @@ void MyFace::xEyes() {
 	B10100101,
 	B01000010,
 	B10100101 };
-	this->transform(xEyes, MASKS[BOTH_EYES]);
+	transform(xEyes, MASKS[BOTH_EYES]);
 	currentEyes = XES;
 }
 
@@ -107,14 +107,14 @@ void MyFace::smile() {
 	const byte smile[8] = { 0, 0, 0, 0, 0,
 	B01000010,
 	B00111100 };
-	this->transform(smile, MASKS[MOUTH]);
+	transform(smile, MASKS[MOUTH]);
 }
 
 void MyFace::neutralFace() {
 	// Serial.println("neutral");
 	const byte neutral[8] = { 0, 0, 0, 0, 0, 0,
 	B00111100 };
-	this->transform(neutral, MASKS[MOUTH]);
+	transform(neutral, MASKS[MOUTH]);
 }
 
 void MyFace::frown() {
@@ -122,7 +122,7 @@ void MyFace::frown() {
 	const byte frown[8] = { 0, 0, 0, 0, 0, 0,
 	B00111100,
 	B01000010 };
-	this->transform(frown, MASKS[MOUTH]);
+	transform(frown, MASKS[MOUTH]);
 }
 
 void MyFace::curlMouth(const bool curlRight) {
@@ -135,11 +135,11 @@ void MyFace::curlMouth(const bool curlRight) {
 	B00111110 };
 	if (curlRight) {
 		// Serial.println("_R");
-		this->transform(curlR, MASKS[MOUTH]);
+		transform(curlR, MASKS[MOUTH]);
 
 	} else {  // curl left
 		// Serial.println("_L");
-		this->transform(curlL, MASKS[MOUTH]);
+		transform(curlL, MASKS[MOUTH]);
 	}
 }
 
@@ -151,6 +151,7 @@ void MyFace::animateFace() {
 		lastBlink = millis() - random(ANIMATION_FUZZ);
 		blinkEyes(BLINK_LENGTH);
 	}
+	/*
 	if (millis() - lastMouth >= MOUTH_PERIOD_MS) {
 		lastMouth = millis() - random(ANIMATION_FUZZ);
 		if (random(0, 2)) {
@@ -159,12 +160,13 @@ void MyFace::animateFace() {
 			curlMouth(random(0, 2));
 		}
 	}
+	*/
 }
 
 void MyFace::transform(const byte desired[8], const byte mask[8]) {
 	int i, j;
 	byte output[8];
-	memcpy(output, this->currentMatrix, sizeof(byte) * 8);
+	memcpy(output, currentMatrix, sizeof(byte) * 8);
 	for (i = 0; i < 8; i++) {
 		for (j = 7; j >= 0; j--) {
 			if (bitRead(mask[i], j)) {

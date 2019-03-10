@@ -116,7 +116,7 @@ public:
 	MyFace(const int din, const int clk, const int cs);
 	MyFace();
 	virtual ~MyFace();
-	void drawAll(const byte image[]);
+	void drawAll(const byte image[8]);
 	void drawEyes(EYES index);
 	void blinkEyes(const int duration, const int depth = 0);
 	void closeEyes();
