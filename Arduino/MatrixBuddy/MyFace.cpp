@@ -151,16 +151,16 @@ void MyFace::animateFace() {
 		lastBlink = millis() - random(ANIMATION_FUZZ);
 		blinkEyes(BLINK_LENGTH);
 	}
-	/*
-	if (millis() - lastMouth >= MOUTH_PERIOD_MS) {
-		lastMouth = millis() - random(ANIMATION_FUZZ);
-		if (random(0, 2)) {
-			smile();
-		} else {
-			curlMouth(random(0, 2));
-		}
-	}
-	*/
+	/*  // Makes MyNeck animate fail
+	 if (millis() - lastMouth >= MOUTH_PERIOD_MS) {
+	 lastMouth = millis() - random(ANIMATION_FUZZ);
+	 if (random(0, 2)) {
+	 smile();
+	 } else {
+	 curlMouth(random(0, 2));
+	 }
+	 }
+	 */
 }
 
 void MyFace::transform(const byte desired[8], const byte mask[8]) {

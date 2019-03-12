@@ -63,7 +63,7 @@ void senseISR1() {
 void loop() {
 	if (voiceConnected == DISCONNECTED) {
 		neck->animateNeck();
-		face.animateFace();  // Something about this function makes neck fail
+		face.animateFace();
 	}
 }
 
