@@ -12,11 +12,11 @@
 #include <Servo.h>
 
 /* Animation frequency */
-const unsigned long TOP_PERIOD_MS = 1499L;
-const unsigned long BOTTOM_PERIOD_MS = 1201L;
-const unsigned long ANIMATION_FUZZ_NECK = 1e2L; // MS to fudge the animation to make it more realistic
-const unsigned long TOP_RANGE = 1L;
-const unsigned long BOTTOM_RANGE = 1L;
+const unsigned long TOP_PERIOD_MS = 30e3;
+const unsigned long BOTTOM_PERIOD_MS = 45e3;
+const unsigned long ANIMATION_FUZZ_NECK = 500L; // MS to fudge the animation to make it more realistic
+const unsigned long TOP_RANGE = 15L;
+const unsigned long BOTTOM_RANGE = 15L;
 
 class MyNeck {
 private:
