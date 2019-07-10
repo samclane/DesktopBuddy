@@ -66,11 +66,11 @@ class DiscordListener:
 
     def get_client_state(self):
         state = DISCONNECTED
-        if self.client.is_logged_in:
-            for server in self.client.servers:
+        if self.client.is_ready():
+            for server in self.client.guilds:
                 mem = server.get_member(self.client.user.id)
                 vs = mem.voice
-                if vs.voice_channel is not None:
+                if vs and vs.channel is not None:
                     if vs.deaf or vs.self_deaf:
                         state = DEAFENED
                         break
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     while True:
         try:
             main()
-        except:
-            pass
+        except Exception as e:
+            logging.exception(e)
         else:
             break
